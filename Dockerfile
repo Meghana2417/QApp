@@ -9,4 +9,4 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "APIGateway.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "QApp.wsgi:application", "--bind", "0.0.0.0:8007"]
