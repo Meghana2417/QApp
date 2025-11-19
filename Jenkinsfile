@@ -8,13 +8,13 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/Meghana2417/APIGateway.git'
+                git branch: 'main', url: 'https://github.com/Meghana2417/QApp.git'
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh "docker build --no-cache -t meghana1724/api:latest ."
+                sh "docker build --no-cache -t meghana1724/qapp:latest ."
             }
         }
 
@@ -26,19 +26,19 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                sh "docker push meghana1724/api:latest"
+                sh "docker push meghana1724/qapp:latest"
             }
         }
 
         stage('Deploy') {
             steps {
                 sh '''
-                docker stop api || true
-                docker rm api || true
+                docker stop qapp || true
+                docker rm qapp || true
 
-                docker pull meghana1724/api:latest
+                docker pull meghana1724/qapp:latest
 
-                docker run -d --name api -p 8000:8000 meghana1724/api:latest
+                docker run -d --name qapp -p 8000:8000 meghana1724/qapp:latest
                 '''
             }
         }
