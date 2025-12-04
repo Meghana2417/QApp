@@ -10,5 +10,5 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "QApp.wsgi:application", "--config", "gunicorn_config.py"]
-#CMD ["gunicorn", "QApp.wsgi:application", "--bind", "0.0.0.0:8007"]
+#CMD ["gunicorn", "QApp.wsgi:application", "--config", "gunicorn_config.py"]
+CMD ["gunicorn", "QApp.wsgi:application", "--bind", "0.0.0.0:8000"]
