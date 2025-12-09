@@ -2,7 +2,7 @@ name: Deploy QApp
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -13,22 +13,65 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload project to server
+      # ---------------------------
+      # 1. Run Test Cases
+      # ---------------------------
+    #  - name: Setup Python
+    #    uses: actions/setup-python@v5
+     #   with:
+     #     python-version: "3.10"
+
+    #  - name: Install Python dependencies
+     #   run: |
+      #    pip install -r requirements.txt
+
+     # - name: Run Test Script
+       # run: |
+       #   chmod +x test.sh
+        #  ./test.sh
+
+      # ---------------------------
+      # 2. Upload Code to Server
+      # ---------------------------
+      - name: Upload new project
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "."
-          target: "~/QApp/"
+          target: "~/QApp_new/"
 
-      - name: Deploy using SSH
+      # ---------------------------
+      # 3. Deploy + Rollback
+      # ---------------------------
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
+            echo "Taking Backup..."
+            if [ -d ~/QApp ]; then
+              mv ~/QApp ~/QApp_backup_$(date +%F-%H-%M)
+            fi
+
+            echo " Switching Deployment..."
+            mv ~/QApp_new ~/QApp
+
+            echo " Running deployment script..."
             cd ~/QApp
             chmod +x docker-run.sh
-            ./docker-run.sh
+            
+            # If deployment fails → run rollback.sh
+            if ! ./docker-run.sh; then
+              echo "Deployment failed — running rollback"
+              chmod +x rollback.sh
+              ./rollback.sh
+              exit 1
+            fi
+
+            echo "Deployment completed"
